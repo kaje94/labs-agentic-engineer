@@ -100,10 +100,15 @@ up the local stack — watch this section for the URL once it lands.
 
 ### Prerequisites
 
-- Docker + `docker compose` (Colima works too on macOS — `setup-k3d.sh` auto-adjusts for it)
+- Docker + `docker compose`. Colima works too — on Apple Silicon, start it with
+  enough headroom and Rosetta (runner image is `linux/amd64`):
+  ```bash
+  colima start -f --vm-type=vz --vz-rosetta --cpu 4 --memory 8
+  ```
 - [`k3d`](https://k3d.io/), `kubectl`, `helm`
-- An Anthropic API key (for the AI agents)
-- Optional: a GitHub App (for end-to-end repo provisioning + webhooks)
+- **Anthropic API key** — set as `ANTHROPIC_API_KEY` in `deployments/.env`.
+- **GitHub access** — connected post-bring-up in the console at
+  **Settings → GitHub Integration**. See [Connecting GitHub](#connecting-github).
 
 ### Bring-up
 
@@ -111,7 +116,7 @@ up the local stack — watch this section for the URL once it lands.
 # 1. One-shot bring-up: k3d cluster + OpenChoreo + Thunder + platform infra
 bash deployments/scripts/setup.sh
 
-# 2. Set your Anthropic key (and optional GITHUB_APP_* values)
+# 2. Set ANTHROPIC_API_KEY (and any GITHUB_APP_* values if using App mode)
 $EDITOR deployments/.env
 
 # 3. Start the Docker Compose stack (BFF, agents, git-service, console, db, smee)
@@ -120,6 +125,21 @@ bash deployments/scripts/start.sh
 
 Open **http://localhost:8090** and sign in with `admin` / `admin` (the default
 Thunder admin in the `Administrators` group).
+
+### Connecting GitHub
+
+After login, open **Settings → GitHub Integration** and connect either:
+
+- **PAT (simplest).** Classic: `repo`, `admin:org`, `admin:repo_hook`. Fine-grained:
+  scope to the org with **All repositories**, then grant Read & Write on
+  Repo · {Administration, Contents, Issues, Pull requests, Webhooks} and
+  Org · {Administration, Projects}, plus Read on Repo · Metadata and Org · Members.
+  The exact list is also shown in the connect form.
+- **GitHub App.** Set `GITHUB_APP_*` in `deployments/.env`, drop the private key at
+  `GITHUB_APP_PRIVATE_KEY_PATH`, then `docker compose up -d --force-recreate asdlc-api`.
+
+Without GitHub connected, requirements and design flows still work; repo
+provisioning, issues, and the coding-agent are disabled.
 
 ### Main scripts (under `deployments/scripts/`)
 
