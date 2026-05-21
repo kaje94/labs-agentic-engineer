@@ -1,32 +1,68 @@
-# WSO2 Labs Agentic Engineer
+# WSO2 Labs: Agentic Engineer
 
-> ⚠️ ** EXPERIMENTAL — PROOF OF CONCEPT**
->
-> This repository is a research/PoC effort. It is **not production-ready**, APIs and
-> data models change without notice, and entire subsystems may be ripped out between
-> commits. There are no stability guarantees. Do not deploy this as-is.
+> 🧪 **Early lab project** — APIs, data models, and features are still evolving,
+> and subsystems may change shape between commits. Try it, break it, tell us what
+> you think — just don't build on it as a stable surface yet.
 
 Repository: [`wso2/labs-agentic-engineer`](https://github.com/wso2/labs-agentic-engineer)
 
-An AI-driven, spec-driven engineering platform built on top of
-[OpenChoreo](https://github.com/openchoreo/openchoreo). It explores what an
-end-to-end "describe a project in markdown, get a deployed system" workflow could
-look like, with AI agents driving every stage:
+An experimental, open-source platform that explores what **agent-driven software
+engineering** looks like when the agents work inside an enterprise platform instead
+of a blank editor. It's an early WSO2 lab project, built on top of
+[OpenChoreo](https://github.com/openchoreo/openchoreo) and shared in the spirit of
+"let's see what works."
 
-```
-Specification → Design → Implementation → Build → Deploy → Manage
-```
+## The premise
 
-## Trying it out
+Agentic coding tools have made greenfield code generation fast and accessible. But
+enterprise software isn't bottlenecked on typing — it's bottlenecked on requirements,
+integrations, identity, deployment, and architectural conformance. The bet behind
+this project is that to push productivity further, agents need to operate **inside a
+platform that already understands those concerns**, so they can produce systems that
+slot into the existing ecosystem rather than ignore it.
 
-Today, the only way to try this is **locally** — see [Running it locally](#running-it-locally)
-below. A hosted version on **WSO2 Cloud** is planned; this section will get the URL
-once it lands.
+OpenChoreo already handles API management, identity, deployments, observability, and
+policy enforcement. The agents in this repo build on that foundation, so what they
+produce lands in an environment that enforces enterprise concerns automatically.
 
-Feedback (bug reports, "this is confusing," "this is broken") is welcome via GitHub
-issues on the repo.
+## What the platform does
 
-## What's in here
+It treats the SDLC as a chain of stages — **Specification → Design → Implementation
+→ Build → Deploy → Manage** — and gives each stage a specialized agent with only the
+tools and skills it needs. The flow:
+
+- A **business owner** describes the solution they want; a chat agent guides
+  requirements elicitation.
+- A **shared workspace** lets BAs, designers, and engineers collaborate on the same
+  artifacts, each with a view suited to them.
+- Everything is captured as **spec files in a Git repository** (`specs/requirements/`,
+  `specs/design/`, wireframes, domain models). Those specs become the contract
+  downstream agents work against.
+- Coding agents pick up tasks from those specs, work via **GitHub issues + branches
+  + PRs** (no merge without human review), and the platform watches webhooks to drive
+  each task through `pending → in_progress → ready_for_review → merged → building → deployed`.
+- Because agents share context across artifacts, the system stays internally
+  consistent — change a requirement and the wireframes, design, and tasks move with it.
+
+## Design principles worth calling out
+
+- **Spec-driven, Git-native.** Specs live in the project's Git repo, not a
+  proprietary database. Engineers can drop into the code at any stage without
+  leaving familiar tools.
+- **Human-in-the-loop is explicit.** Agents open PRs; they don't merge. State
+  transitions are driven by GitHub events.
+- **Skills are the customization surface.** Organizations encode their own
+  conventions — naming, architecture patterns, security baselines, the approved
+  service catalog — as skills, so standards become something the agents actually
+  apply.
+- **Model-agnostic.** You can pick the LLM behind each agent and mix providers
+  across the lifecycle.
+
+## Demo
+
+https://github.com/user-attachments/assets/9723e5a5-c187-49b5-886e-50c217da6c28
+
+## What's in the repo
 
 | Path | Role |
 |---|---|
@@ -50,11 +86,17 @@ issues on the repo.
 This `README.md` is the on-ramp. `AGENTS.md` (symlinked as `CLAUDE.md`) is the
 day-to-day contributor manual.
 
-## Running it locally
+## Trying it out
 
-Everything starts from [`deployments/`](./deployments) — that's the local
-setup. It brings up a k3d cluster (OpenChoreo + Thunder + OpenBao + ESO + kgateway)
-and a Docker Compose stack for the long-lived services.
+You can try it out locally — clone the repo and run the scripts under
+[`deployments/`](./deployments). The setup brings up a k3d cluster (OpenChoreo +
+Thunder + OpenBao + ESO + kgateway) and a Docker Compose stack for the long-lived
+services (BFF, agents, git-service, console, database, smee relay). Once it's up,
+you sign in to the console at http://localhost:8090 and drive a project end-to-end
+through the agents.
+
+A hosted version on **WSO2 Cloud** is planned so people can try it without standing
+up the local stack — watch this section for the URL once it lands.
 
 ### Prerequisites
 
@@ -164,8 +206,15 @@ See [`tests/README.md`](./tests/README.md) for details.
 - **Agent protocol** — GitHub issue + branch + PR, driven by webhooks
 - **Infra** — k3d (cluster) + Docker Compose (long-lived services)
 
+## Status and feedback
+
+This is an **early lab project**, and the whole point of putting it out now is to
+learn from people working through similar problems: where agent boundaries should
+sit, how skills map to your conventions, what felt natural, what got in the way.
+Feedback goes via GitHub issues on
+[`wso2/labs-agentic-engineer`](https://github.com/wso2/labs-agentic-engineer).
+
 ## License
 
 Apache 2.0 — see [`LICENSE`](./LICENSE).
 
-Again: this is a **proof of concept**. Don't ship it.
